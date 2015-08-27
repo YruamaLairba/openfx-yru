@@ -235,7 +235,7 @@ void FractalVNoisePluginFactory::describe(OFX::ImageEffectDescriptor &desc)
 {
   // basic labels
   desc.setLabels("FractalVNoise Truc", "FractalVNoise Machin", "FractalVNoise Bidule");
-  desc.setPluginGrouping("OFX");
+  desc.setPluginGrouping("Yru");
   desc.setPluginDescription("FractalVNoise pixels value of the image");
 
   // add the supported contexts, only filter at the moment
@@ -333,49 +333,6 @@ void FractalVNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &d
             page->addChild(*param);
         }
     }
-  
- PageParamDescriptor *page2 = desc.definePageParam("Controls 2");
-
-    {
-        OFX::BooleanParamDescriptor* param = desc.defineBooleanParam("R2");
-        param->setLabel("Rouge");
-        param->setHint("Traiter le canal");
-        param->setDefault(true);
-        //param->setLayoutHint(eLayoutHintNoNewLine);
-        if (page2) {
-            page2->addChild(*param);
-        }
-    }
-    {
-        OFX::BooleanParamDescriptor* param = desc.defineBooleanParam("G2");
-        param->setLabel("Vert");
-        param->setHint("Traiter le canal");
-        param->setDefault(true);
-        //param->setLayoutHint(eLayoutHintNoNewLine);
-        if (page2) {
-            page2->addChild(*param);
-        }
-    }
-	{
-        OFX::BooleanParamDescriptor* param = desc.defineBooleanParam("B2");
-        param->setLabel("Bleu");
-        param->setHint("Traiter le canal");
-        param->setDefault(true);
-        //param->setLayoutHint(eLayoutHintNoNewLine);
-        if (page2) {
-            page2->addChild(*param);
-        }
-    }
-    {
-        OFX::BooleanParamDescriptor* param = desc.defineBooleanParam("A2");
-        param->setLabel("Alpha");
-        param->setHint("Traiter le canal");
-        param->setDefault(true);
-        if (page2) {
-            page2->addChild(*param);
-        }
-    }
-
 }
 
 OFX::ImageEffect* FractalVNoisePluginFactory::createInstance(OfxImageEffectHandle handle, OFX::ContextEnum /*context*/)

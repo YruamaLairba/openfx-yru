@@ -1,5 +1,5 @@
 /*
-OFX Invert Example plugin, a plugin that illustrates the use of the OFX Support library.
+OFX FractalVNoise Example plugin, a plugin that illustrates the use of the OFX Support library.
 
 Copyright (C) 2007 The Open Effects Association Ltd
 Author Bruno Nicoletti bruno@thefoundry.co.uk
@@ -48,12 +48,12 @@ England
 
 
 // Base class for the RGBA and the Alpha processor
-class InvertBase : public OFX::ImageProcessor {
+class FractalVNoiseBase : public OFX::ImageProcessor {
 protected :
   OFX::Image *_srcImg;
 public :
   /** @brief no arg ctor */
-  InvertBase(OFX::ImageEffect &instance)
+  FractalVNoiseBase(OFX::ImageEffect &instance)
     : OFX::ImageProcessor(instance)
     , _srcImg(0)
   {        
@@ -65,11 +65,11 @@ public :
 
 // template to do the RGBA processing
 template <class PIX, int nComponents, int max>
-class ImageInverter : public InvertBase {
+class ImageInverter : public FractalVNoiseBase {
 public :
   // ctor
   ImageInverter(OFX::ImageEffect &instance) 
-    : InvertBase(instance)
+    : FractalVNoiseBase(instance)
   {}
 
   // and do some processing
@@ -106,7 +106,7 @@ public :
 
 ////////////////////////////////////////////////////////////////////////////////
 /** @brief The plugin that does our work */
-class InvertPlugin : public OFX::ImageEffect {
+class FractalVNoisePlugin : public OFX::ImageEffect {
 protected :
   // do not need to delete these, the ImageEffect is managing them for us
   OFX::Clip *dstClip_;
@@ -114,7 +114,7 @@ protected :
 
 public :
   /** @brief ctor */
-  InvertPlugin(OfxImageEffectHandle handle)
+  FractalVNoisePlugin(OfxImageEffectHandle handle)
     : ImageEffect(handle)
     , dstClip_(0)
     , srcClip_(0)
@@ -127,7 +127,7 @@ public :
   virtual void render(const OFX::RenderArguments &args);
 
   /* set up and run a processor */
-  void setupAndProcess(InvertBase &, const OFX::RenderArguments &args);
+  void setupAndProcess(FractalVNoiseBase &, const OFX::RenderArguments &args);
 };
 
 
@@ -140,7 +140,7 @@ public :
 
 /* set up and run a processor */
 void
-InvertPlugin::setupAndProcess(InvertBase &processor, const OFX::RenderArguments &args)
+FractalVNoisePlugin::setupAndProcess(FractalVNoiseBase &processor, const OFX::RenderArguments &args)
 {
   // get a dst image
   std::auto_ptr<OFX::Image> dst(dstClip_->fetchImage(args.time));
@@ -173,7 +173,7 @@ InvertPlugin::setupAndProcess(InvertBase &processor, const OFX::RenderArguments 
 
 // the overridden render function
 void
-InvertPlugin::render(const OFX::RenderArguments &args)
+FractalVNoisePlugin::render(const OFX::RenderArguments &args)
 {
   // instantiate the render code based on the pixel depth of the dst clip
   OFX::BitDepthEnum       dstBitDepth    = dstClip_->getPixelDepth();
@@ -228,15 +228,15 @@ default :
   } 
 }
 
-mDeclarePluginFactory(InvertExamplePluginFactory, {}, {});
+mDeclarePluginFactory(FractalVNoisePluginFactory, {}, {});
 
 using namespace OFX;
-void InvertExamplePluginFactory::describe(OFX::ImageEffectDescriptor &desc)
+void FractalVNoisePluginFactory::describe(OFX::ImageEffectDescriptor &desc)
 {
   // basic labels
-  desc.setLabels("Invert Truc", "Invert Machin", "Invert Bidule");
+  desc.setLabels("FractalVNoise Truc", "FractalVNoise Machin", "FractalVNoise Bidule");
   desc.setPluginGrouping("OFX");
-  desc.setPluginDescription("Invert pixels value of the image");
+  desc.setPluginDescription("FractalVNoise pixels value of the image");
 
   // add the supported contexts, only filter at the moment
   desc.addSupportedContext(eContextFilter);
@@ -259,7 +259,7 @@ void InvertExamplePluginFactory::describe(OFX::ImageEffectDescriptor &desc)
 
 }
 
-void InvertExamplePluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc, OFX::ContextEnum context)
+void FractalVNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc, OFX::ContextEnum context)
 {
   // Source clip only in the filter context
   // create the mandated source clip
@@ -378,9 +378,9 @@ void InvertExamplePluginFactory::describeInContext(OFX::ImageEffectDescriptor &d
 
 }
 
-OFX::ImageEffect* InvertExamplePluginFactory::createInstance(OfxImageEffectHandle handle, OFX::ContextEnum /*context*/)
+OFX::ImageEffect* FractalVNoisePluginFactory::createInstance(OfxImageEffectHandle handle, OFX::ContextEnum /*context*/)
 {
-  return new InvertPlugin(handle);
+  return new FractalVNoisePlugin(handle);
 }
 
 namespace OFX 
@@ -389,7 +389,7 @@ namespace OFX
   {  
     void getPluginIDs(OFX::PluginFactoryArray &ids)
     {
-      static InvertExamplePluginFactory p("net.sf.openfx.invertPlugin", 1, 0);
+      static FractalVNoisePluginFactory p("net.sf.openfx.invertPlugin", 1, 0);
       ids.push_back(&p);
     }
   }

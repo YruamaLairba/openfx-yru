@@ -1,4 +1,4 @@
-SUBDIRS = Invert
+SUBDIRS = FractalVNoise
 
 all: subdirs
 

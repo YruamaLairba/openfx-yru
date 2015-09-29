@@ -333,6 +333,7 @@ void FractalVNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &d
             page->addChild(*param);
         }
     }
+	
 }
 
 OFX::ImageEffect* FractalVNoisePluginFactory::createInstance(OfxImageEffectHandle handle, OFX::ContextEnum /*context*/)

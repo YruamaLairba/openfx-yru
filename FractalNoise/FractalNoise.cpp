@@ -1,5 +1,5 @@
 /*
-OFX FractalVNoise Example plugin, a plugin that illustrates the use of the OFX Support library.
+OFX FractalNoise Example plugin, a plugin that illustrates the use of the OFX Support library.
 
 Copyright (C) 2007 The Open Effects Association Ltd
 Author Bruno Nicoletti bruno@thefoundry.co.uk
@@ -48,12 +48,12 @@ England
 
 
 // Base class for the RGBA and the Alpha processor
-class FractalVNoiseBase : public OFX::ImageProcessor {
+class FractalNoiseBase : public OFX::ImageProcessor {
 protected :
   OFX::Image *_srcImg;
 public :
   /** @brief no arg ctor */
-  FractalVNoiseBase(OFX::ImageEffect &instance)
+  FractalNoiseBase(OFX::ImageEffect &instance)
     : OFX::ImageProcessor(instance)
     , _srcImg(0)
   {        
@@ -65,11 +65,11 @@ public :
 
 // template to do the RGBA processing
 template <class PIX, int nComponents, int max>
-class ImageInverter : public FractalVNoiseBase {
+class ImageInverter : public FractalNoiseBase {
 public :
   // ctor
   ImageInverter(OFX::ImageEffect &instance) 
-    : FractalVNoiseBase(instance)
+    : FractalNoiseBase(instance)
   {}
 
   // and do some processing
@@ -106,7 +106,7 @@ public :
 
 ////////////////////////////////////////////////////////////////////////////////
 /** @brief The plugin that does our work */
-class FractalVNoisePlugin : public OFX::ImageEffect {
+class FractalNoisePlugin : public OFX::ImageEffect {
 protected :
   // do not need to delete these, the ImageEffect is managing them for us
   OFX::Clip *dstClip_;
@@ -114,7 +114,7 @@ protected :
 
 public :
   /** @brief ctor */
-  FractalVNoisePlugin(OfxImageEffectHandle handle)
+  FractalNoisePlugin(OfxImageEffectHandle handle)
     : ImageEffect(handle)
     , dstClip_(0)
     , srcClip_(0)
@@ -127,7 +127,7 @@ public :
   virtual void render(const OFX::RenderArguments &args);
 
   /* set up and run a processor */
-  void setupAndProcess(FractalVNoiseBase &, const OFX::RenderArguments &args);
+  void setupAndProcess(FractalNoiseBase &, const OFX::RenderArguments &args);
 };
 
 
@@ -140,7 +140,7 @@ public :
 
 /* set up and run a processor */
 void
-FractalVNoisePlugin::setupAndProcess(FractalVNoiseBase &processor, const OFX::RenderArguments &args)
+FractalNoisePlugin::setupAndProcess(FractalNoiseBase &processor, const OFX::RenderArguments &args)
 {
   // get a dst image
   std::auto_ptr<OFX::Image> dst(dstClip_->fetchImage(args.time));
@@ -173,7 +173,7 @@ FractalVNoisePlugin::setupAndProcess(FractalVNoiseBase &processor, const OFX::Re
 
 // the overridden render function
 void
-FractalVNoisePlugin::render(const OFX::RenderArguments &args)
+FractalNoisePlugin::render(const OFX::RenderArguments &args)
 {
   // instantiate the render code based on the pixel depth of the dst clip
   OFX::BitDepthEnum       dstBitDepth    = dstClip_->getPixelDepth();
@@ -228,15 +228,15 @@ default :
   } 
 }
 
-mDeclarePluginFactory(FractalVNoisePluginFactory, {}, {});
+mDeclarePluginFactory(FractalNoisePluginFactory, {}, {});
 
 using namespace OFX;
-void FractalVNoisePluginFactory::describe(OFX::ImageEffectDescriptor &desc)
+void FractalNoisePluginFactory::describe(OFX::ImageEffectDescriptor &desc)
 {
   // basic labels
-  desc.setLabels("FractalVNoise Truc", "FractalVNoise Machin", "FractalVNoise Bidule");
+  desc.setLabels("FractalNoise Truc", "FractalNoise Machin", "FractalNoise Bidule");
   desc.setPluginGrouping("Yru");
-  desc.setPluginDescription("FractalVNoise pixels value of the image");
+  desc.setPluginDescription("FractalNoise pixels value of the image");
 
   // add the supported contexts, only filter at the moment
   desc.addSupportedContext(eContextFilter);
@@ -259,7 +259,7 @@ void FractalVNoisePluginFactory::describe(OFX::ImageEffectDescriptor &desc)
 
 }
 
-void FractalVNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc, OFX::ContextEnum context)
+void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc, OFX::ContextEnum context)
 {
   // Source clip only in the filter context
   // create the mandated source clip
@@ -336,9 +336,9 @@ void FractalVNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &d
 	
 }
 
-OFX::ImageEffect* FractalVNoisePluginFactory::createInstance(OfxImageEffectHandle handle, OFX::ContextEnum /*context*/)
+OFX::ImageEffect* FractalNoisePluginFactory::createInstance(OfxImageEffectHandle handle, OFX::ContextEnum /*context*/)
 {
-  return new FractalVNoisePlugin(handle);
+  return new FractalNoisePlugin(handle);
 }
 
 namespace OFX 
@@ -347,7 +347,7 @@ namespace OFX
   {  
     void getPluginIDs(OFX::PluginFactoryArray &ids)
     {
-      static FractalVNoisePluginFactory p("net.sf.openfx.invertPlugin", 1, 0);
+      static FractalNoisePluginFactory p("net.sf.openfx.invertPlugin", 1, 0);
       ids.push_back(&p);
     }
   }

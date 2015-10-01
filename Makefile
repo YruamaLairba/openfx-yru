@@ -1,4 +1,4 @@
-SUBDIRS = FractalVNoise
+SUBDIRS = FractalNoise
 
 all: subdirs
 

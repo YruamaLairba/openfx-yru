@@ -234,7 +234,7 @@ using namespace OFX;
 void FractalNoisePluginFactory::describe(OFX::ImageEffectDescriptor &desc)
 {
   // basic labels
-  desc.setLabels("FractalNoise Truc", "FractalNoise Machin", "FractalNoise Bidule");
+  desc.setLabels("FractalNoise", "FractalNoise", "FractalNoise");
   desc.setPluginGrouping("Yru");
   desc.setPluginDescription("FractalNoise pixels value of the image");
 
@@ -294,6 +294,67 @@ void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &de
 
   PageParamDescriptor *page = desc.definePageParam("Controls");
 
+    //Position
+    {
+        OFX::Double2DParamDescriptor* param = desc.defineDouble2DParam("position");
+        param->setLabel("Position");
+        param->setHint("Position");
+        param->setDefault(0.0,0.0);
+        if (page) {
+            page->addChild(*param);
+        }
+    }
+    //Evolution
+    {
+        OFX::DoubleParamDescriptor* param = desc.defineDoubleParam("evolution");
+        param->setLabel("Evolution");
+        param->setHint("Evolution");
+        param->setDefault(0.0);
+        if (page) {
+            page->addChild(*param);
+        }
+    }
+    //Frequency
+    {
+        OFX::Double2DParamDescriptor* param = desc.defineDouble2DParam("frequency");
+        param->setLabel("Frequency");
+        param->setHint("Frequency");
+        param->setDefault(0.0,0.0);
+        if (page) {
+            page->addChild(*param);
+        }
+    }
+    //Lacunarity
+    {
+        OFX::DoubleParamDescriptor* param = desc.defineDoubleParam("lacunarity");
+        param->setLabel("Lacunarity");
+        param->setHint("Lacunarity");
+        param->setDefault(0.0);
+        if (page) {
+            page->addChild(*param);
+        }
+    }
+    //Number of Octave
+    {
+        OFX::IntParamDescriptor* param = desc.defineIntParam("nbOctave");
+        param->setLabel("Number of octave");
+        param->setHint("Number of octave");
+        param->setDefault(0);
+        if (page) {
+            page->addChild(*param);
+        }
+    }
+    //persistence
+    {
+        OFX::IntParamDescriptor* param = desc.defineIntParam("persistence");
+        param->setLabel("persistence");
+        param->setHint("persistence");
+        param->setDefault(0);
+        if (page) {
+            page->addChild(*param);
+        }
+    }
+    
     {
         OFX::BooleanParamDescriptor* param = desc.defineBooleanParam("R");
         param->setLabel("Rouge");

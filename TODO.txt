@@ -4,11 +4,14 @@ Rename FractalVNoise to FractalNoise
 
 FracatlNoise
 parameters of the plugin :
+ - type of noise : Perlin, billow, ridged
+ - noise quality : list of value
+
  - position : x and y
  - evolution (z)
+ 
  - frequency : x and y
  - Lacunarity : float
- - noise quality : list of value
  - number of octave : int
  - persistence : float from 0 to 1
- - type of noise : Perlin, billow, ridged
+ 

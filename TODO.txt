@@ -1,6 +1,10 @@
 TODO
 
-Rename FractalVNoise to FractalNoise
+Rename FractalVNoise to FractalNoise - done
+
+Intergrate libnoise to the project :
+ - add git submodule - done
+ - update makefile to build libnoise if needed
 
 FracatlNoise
 parameters of the plugin :

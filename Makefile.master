@@ -56,7 +56,7 @@ all: $(OBJECTPATH)/$(PLUGINNAME).ofx.bundle
 FPIC=-fPIC
   ifeq ($(OS),Windows_NT)
     # use $ORIGIN to link to bundled libraries first, see http://itee.uq.edu.au/~daniel/using_origin/
-    LINKFLAGS = -static -shared -Wl,--dll -fvisibility=hidden  -lopengl32
+    LINKFLAGS = -L$(PATHTOROOT)/libnoise/build_MinGW64/src -static -shared -Wl,--dll -fvisibility=hidden  -lopengl32 -lnoise
     ARCH = Win32
     BITSFLAG = -m32
     ifeq ($(BITS), 64)
@@ -68,7 +68,7 @@ FPIC=-fPIC
   endif
   ifeq ($(OS),Linux)
     # use $ORIGIN to link to bundled libraries first, see http://itee.uq.edu.au/~daniel/using_origin/
-    LINKFLAGS = -shared -fvisibility=hidden -Xlinker --version-script=$(PATHTOROOT)/include/linuxSymbols -lGL -Wl,-rpath,'$$ORIGIN'/../../Libraries
+    LINKFLAGS = -L$(PATHTOROOT)/libnoise/build_MinGW64/src -shared -fvisibility=hidden -Xlinker --version-script=$(PATHTOROOT)/include/linuxSymbols -lGL -lnoise -Wl,-rpath,'$$ORIGIN'/../../Libraries
     ARCH = Linux-x86
     BITSFLAG = -m32
     ifeq ($(BITS), 64)
@@ -78,7 +78,7 @@ FPIC=-fPIC
     LINKFLAGS := $(LINKFLAGS) $(BITSFLAG)
   endif
   ifeq ($(OS),FreeBSD)
-    LINKFLAGS = -L/usr/local/lib -shared -fvisibility=hidden -Xlinker --version-script=$(PATHTOROOT)/include/linuxSymbols -lGL -Wl,-rpath,'$$ORIGIN'/../../Libraries
+    LINKFLAGS = -L/usr/local/lib -L$(PATHTOROOT)/libnoise/build_MinGW64/src -shared -fvisibility=hidden -Xlinker --version-script=$(PATHTOROOT)/include/linuxSymbols -lGL -lnoise -Wl,-rpath,'$$ORIGIN'/../../Libraries
     ARCH= FreeBSD-x86
     BITSFLAG = -m32
     ifeq ($(BITS), 64)
@@ -108,11 +108,12 @@ FPIC=-fPIC
       endif
       BITSFLAG = -isysroot /Developer/SDKs/MacOSX$(MACOSX).sdk $(ARCHFLAGS) -mmacosx-version-min=$(MACOSX)
     endif
-    LINKFLAGS = $(BITSFLAG) -bundle -fvisibility=hidden -exported_symbols_list $(PATHTOROOT)/include/osxSymbols -framework OpenGL -Wl,-rpath,@loader_path/../Frameworks -Wl,-rpath,@loader_path/../Libraries
+    LINKFLAGS = $(BITSFLAG) -bundle -fvisibility=hidden -exported_symbols_list $(PATHTOROOT)/include/osxSymbols -framework OpenGL -L$(PATHTOROOT)/libnoise/build_MinGW64/src -lnoise -Wl,-rpath,@loader_path/../Frameworks -Wl,-rpath,@loader_path/../Libraries
     ARCH = MacOS
   endif
 
-  CXXFLAGS := $(DEBUGFLAG)  -I$(PATHTOROOT)/openfx-API/include -I$(PATHTOROOT)/include -I$(PATHTOROOT)/openfx-API/Support/include $(BITSFLAG)  -fvisibility=hidden $(FPIC) $(CXXFLAGS_ADD) 
+  #Compilation Flags
+  CXXFLAGS := $(DEBUGFLAG) -I$(PATHTOROOT)/libnoise/src -I$(PATHTOROOT)/openfx-API/include -I$(PATHTOROOT)/include -I$(PATHTOROOT)/openfx-API/Support/include $(BITSFLAG)  -fvisibility=hidden $(FPIC) $(CXXFLAGS_ADD) 
 
 $(OBJECTPATH)/$(PLUGINNAME).ofx: $(addprefix $(OBJECTPATH)/,$(PLUGINOBJECTS)) $(SUPPORTOBJECTS)
 	mkdir -p $(OBJECTPATH)/

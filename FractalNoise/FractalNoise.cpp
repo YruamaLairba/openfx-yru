@@ -21,6 +21,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <windows.h>
 #endif
 
+//include libnoise lib
+#include "noise/noise.h"
+
 #include <stdio.h>
 #include "ofxsImageEffect.h"
 #include "ofxsMultiThread.h"

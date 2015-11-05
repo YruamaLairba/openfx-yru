@@ -1,9 +1,11 @@
 TODO
 
 Rename FractalVNoise to FractalNoise - done
+Change FractalNoise header - done but can be improved
 
 Intergrate libnoise to the project :
  - add git submodule - done
+ - change submodule to subtree ?
  - update makefile to build libnoise if needed
 
 FracatlNoise

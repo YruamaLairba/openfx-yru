@@ -36,14 +36,34 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class FractalNoiseBase : public OFX::ImageProcessor {
 protected :
   OFX::Image *_srcImg;
+  
+  //position of noise
+  float posX, posY;
+  
+  //evolution 
+  float posZ;
+  
+  
+  //noise generator
+  noise::module::Perlin noiseGenerator;
 public :
   /** @brief no arg ctor */
   FractalNoiseBase(OFX::ImageEffect &instance)
     : OFX::ImageProcessor(instance)
     , _srcImg(0)
+    , posX(0)
+    , posY(0)
+    , posZ(0)
   {        
   }
-
+  //setters
+  void setPosX(float value){posX = value ;}
+  
+  void setPosY(float value){posY = value ;}
+  
+  void setPosZ(float value){posZ = value ;}
+  
+  
   /** @brief set the src image */
   void setSrcImg(OFX::Image *v) {_srcImg = v;}
 };
@@ -60,6 +80,8 @@ public :
   // and do some processing
   void multiThreadProcessImages(OfxRectI procWindow)
   {
+    //noise::module::Perlin noiseGenerator;
+    
     for(int y = procWindow.y1; y < procWindow.y2; y++) {
       if(_effect.abort()) break;
 
@@ -72,7 +94,8 @@ public :
         // do we have a source image to scale up
         if(srcPix) {
           for(int c = 0; c < nComponents; c++) {
-            dstPix[c] = max - srcPix[c];
+            dstPix[c]=(1.0+this->noiseGenerator.GetValue((x-posX)*0.01,(y-posY)*0.01,posZ))/2.0;
+            //dstPix[c] = max - srcPix[c];
           }
         }
         else {
@@ -96,6 +119,13 @@ protected :
   // do not need to delete these, the ImageEffect is managing them for us
   OFX::Clip *dstClip_;
   OFX::Clip *srcClip_;
+  
+  OFX::Double2DParam *position_;
+  OFX::DoubleParam *evolution_;
+  
+  
+  //the noise generator
+  //noise::module::Perlin noiseGenerator;
 
 public :
   /** @brief ctor */
@@ -103,9 +133,13 @@ public :
     : ImageEffect(handle)
     , dstClip_(0)
     , srcClip_(0)
+    , position_(0)
+    , evolution_(0)
   {
     dstClip_ = fetchClip(kOfxImageEffectOutputClipName);
     srcClip_ = fetchClip(kOfxImageEffectSimpleSourceClipName);
+    position_= fetchDouble2DParam("position");
+    evolution_= fetchDoubleParam("evolution");
   }
 
   /* Override the render */
@@ -144,6 +178,18 @@ FractalNoisePlugin::setupAndProcess(FractalNoiseBase &processor, const OFX::Rend
     if(srcBitDepth != dstBitDepth || srcComponents != dstComponents)
       throw int(1); // HACK!! need to throw an sensible exception here!
   }
+  
+  // set position
+  double posX;
+  double posY;
+  position_->getValueAtTime(args.time, posX, posY);
+  processor.setPosX(posX);
+  processor.setPosY(posY);
+  
+  //set evolution
+  double posZ;
+  evolution_->getValueAtTime(args.time, posZ);
+  processor.setPosZ(posZ);
 
   // set the images
   processor.setDstImg(dst.get());
@@ -167,6 +213,7 @@ FractalNoisePlugin::render(const OFX::RenderArguments &args)
   // do the rendering
   if(dstComponents == OFX::ePixelComponentRGBA) {
     switch(dstBitDepth) {
+/*
 case OFX::eBitDepthUByte : {      
   ImageInverter<unsigned char, 4, 255> fred(*this);
   setupAndProcess(fred, args);
@@ -178,7 +225,7 @@ case OFX::eBitDepthUShort : {
   setupAndProcess(fred, args);
                             }                          
                             break;
-
+*/
 case OFX::eBitDepthFloat : {
   ImageInverter<float, 4, 1> fred(*this);
   setupAndProcess(fred, args);
@@ -229,8 +276,8 @@ void FractalNoisePluginFactory::describe(OFX::ImageEffectDescriptor &desc)
   desc.addSupportedContext(eContextPaint);
 
   // add supported pixel depths
-  desc.addSupportedBitDepth(eBitDepthUByte);
-  desc.addSupportedBitDepth(eBitDepthUShort);
+  //desc.addSupportedBitDepth(eBitDepthUByte);
+  //desc.addSupportedBitDepth(eBitDepthUShort);
   desc.addSupportedBitDepth(eBitDepthFloat);
 
   // set a few flags

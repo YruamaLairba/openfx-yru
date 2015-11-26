@@ -43,6 +43,9 @@ protected :
   //evolution 
   float posZ;
   
+  //freqency X and Y
+  float freqX, freqY;
+  
   
   //noise generator
   noise::module::Perlin noiseGenerator;
@@ -54,6 +57,8 @@ public :
     , posX(0)
     , posY(0)
     , posZ(0)
+    , freqX(0)
+    , freqY(0)
   {        
   }
   //setters
@@ -62,6 +67,10 @@ public :
   void setPosY(float value){posY = value ;}
   
   void setPosZ(float value){posZ = value ;}
+  
+  void setFreqX(float value){freqX = value ;}
+  
+  void setFreqY(float value){freqY = value ;}
   
   
   /** @brief set the src image */
@@ -94,7 +103,7 @@ public :
         // do we have a source image to scale up
         if(srcPix) {
           for(int c = 0; c < nComponents; c++) {
-            dstPix[c]=(1.0+this->noiseGenerator.GetValue((x-posX)*0.01,(y-posY)*0.01,posZ))/2.0;
+            dstPix[c]=(1.0+this->noiseGenerator.GetValue((x-posX)*freqX,(y-posY)*freqY,posZ))/2.0;
             //dstPix[c] = max - srcPix[c];
           }
         }
@@ -122,6 +131,8 @@ protected :
   
   OFX::Double2DParam *position_;
   OFX::DoubleParam *evolution_;
+  OFX::Double2DParam *frequency_;
+  
   
   
   //the noise generator
@@ -135,11 +146,13 @@ public :
     , srcClip_(0)
     , position_(0)
     , evolution_(0)
+    , frequency_(0)
   {
     dstClip_ = fetchClip(kOfxImageEffectOutputClipName);
     srcClip_ = fetchClip(kOfxImageEffectSimpleSourceClipName);
-    position_= fetchDouble2DParam("position");
-    evolution_= fetchDoubleParam("evolution");
+    position_ = fetchDouble2DParam("position");
+    evolution_ = fetchDoubleParam("evolution");
+    frequency_ = fetchDouble2DParam("frequency");
   }
 
   /* Override the render */
@@ -190,6 +203,12 @@ FractalNoisePlugin::setupAndProcess(FractalNoiseBase &processor, const OFX::Rend
   double posZ;
   evolution_->getValueAtTime(args.time, posZ);
   processor.setPosZ(posZ);
+  
+  //set frequency
+  double freqX, freqY;
+  frequency_->getValueAtTime(args.time, freqX, freqY);
+  processor.setFreqX(freqX);
+  processor.setFreqY(freqY);
 
   // set the images
   processor.setDstImg(dst.get());

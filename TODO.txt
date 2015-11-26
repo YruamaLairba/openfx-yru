@@ -20,4 +20,7 @@ parameters of the plugin :
  - Lacunarity : float
  - number of octave : int
  - persistence : float from 0 to 1
+
+ - intensity
+ - offset
  

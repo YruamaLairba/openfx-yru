@@ -45,7 +45,16 @@ protected :
   
   //freqency X and Y
   float freqX, freqY;
+  /*
+  //lacunarity
+  float lacunarity;
   
+  //number of Octave
+  int nbOctave;
+  
+  //persistence
+  float persistence;
+  */
   
   //noise generator
   noise::module::Perlin noiseGenerator;
@@ -59,18 +68,24 @@ public :
     , posZ(0)
     , freqX(0)
     , freqY(0)
+    /*
+    , lacunarity(0)
+    , nbOctave(0)
+    , persistence(0)
+    */
   {        
   }
   //setters
   void setPosX(float value){posX = value ;}
-  
   void setPosY(float value){posY = value ;}
-  
   void setPosZ(float value){posZ = value ;}
-  
   void setFreqX(float value){freqX = value ;}
-  
   void setFreqY(float value){freqY = value ;}
+  
+  void setLacunarity(double value){noiseGenerator.SetLacunarity(value);}
+  void setNbOctave(int value){noiseGenerator.SetOctaveCount(value);}
+  void setPersistence(double value){noiseGenerator.SetPersistence(value);}
+  
   
   
   /** @brief set the src image */
@@ -132,7 +147,9 @@ protected :
   OFX::Double2DParam *position_;
   OFX::DoubleParam *evolution_;
   OFX::Double2DParam *frequency_;
-  
+  OFX::DoubleParam *lacunarity_;
+  OFX::IntParam *nbOctave_;
+  OFX::DoubleParam *persistence_;
   
   
   //the noise generator
@@ -147,12 +164,20 @@ public :
     , position_(0)
     , evolution_(0)
     , frequency_(0)
+    , lacunarity_(0)
+    , nbOctave_(0)
+    , persistence_(0)
   {
     dstClip_ = fetchClip(kOfxImageEffectOutputClipName);
     srcClip_ = fetchClip(kOfxImageEffectSimpleSourceClipName);
     position_ = fetchDouble2DParam("position");
     evolution_ = fetchDoubleParam("evolution");
     frequency_ = fetchDouble2DParam("frequency");
+    
+    lacunarity_ = fetchDoubleParam("lacunarity");
+    nbOctave_ = fetchIntParam("nbOctave");
+    persistence_ = fetchDoubleParam("persistence");
+    
   }
 
   /* Override the render */
@@ -192,6 +217,10 @@ FractalNoisePlugin::setupAndProcess(FractalNoiseBase &processor, const OFX::Rend
       throw int(1); // HACK!! need to throw an sensible exception here!
   }
   
+  // set the images
+  processor.setDstImg(dst.get());
+  processor.setSrcImg(src.get());
+  
   // set position
   double posX;
   double posY;
@@ -210,10 +239,21 @@ FractalNoisePlugin::setupAndProcess(FractalNoiseBase &processor, const OFX::Rend
   processor.setFreqX(freqX);
   processor.setFreqY(freqY);
 
-  // set the images
-  processor.setDstImg(dst.get());
-  processor.setSrcImg(src.get());
-
+  //set lacunarity
+  double lacunarity;
+  lacunarity_->getValueAtTime(args.time, lacunarity);
+  processor.setLacunarity(lacunarity);
+  
+  //set number of octave
+  int nbOctave;
+  nbOctave_->getValueAtTime(args.time, nbOctave);
+  processor.setNbOctave(nbOctave);
+  
+  //set persistence
+  double persistence;
+  persistence_->getValueAtTime(args.time, persistence);
+  processor.setPersistence(persistence);
+  
   // set the render window
   processor.setRenderWindow(args.renderWindow);
 
@@ -397,7 +437,7 @@ void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &de
     }
     //persistence
     {
-        OFX::IntParamDescriptor* param = desc.defineIntParam("persistence");
+        OFX::DoubleParamDescriptor* param = desc.defineDoubleParam("persistence");
         param->setLabel("persistence");
         param->setHint("persistence");
         param->setDefault(0);

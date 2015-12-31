@@ -1,0 +1,99 @@
+cmake_minimum_required (VERSION 2.6)
+project (openfx-yru_FractalNoise)
+
+###compiling OFX_SUPPORT
+# add_library(
+	# OFX_SUPPORT STATIC
+	# ../openfx-API/Support/Library/ofxsInteract.cpp
+	# ../openfx-API/Support/Library/ofxsProperty.cpp
+	# ../openfx-API/Support/Library/ofxsLog.cpp
+	# ../openfx-API/Support/Library/ofxsCore.cpp
+	# ../openfx-API/Support/Library/ofxsPropertyValidation.cpp
+	# ../openfx-API/Support/Library/ofxsImageEffect.cpp
+	# ../openfx-API/Support/Library/ofxsParams.cpp
+# )
+
+
+###libnoise path
+# try to find library
+find_library(LIBNOISE_LIB libnoise)
+message(LIBNOISE_LIB : ${LIBNOISE_LIB})
+set(LIBNOISE_INCLUDE_PATH "" CACHE PATH "Path to the libnoise header ")
+set(LIBNOISE_LIB "LIBNOISE_LIB" CACHE FILEPATH "path to the libnoise library ")
+get_filename_component(LIBNOISE_LIB_PATH LIBNOISE_LIB DIRECTORY CACHE)
+link_directories(${LIBNOISE_LIB_PATH})
+
+###determine target architecture for packaging
+
+message(CMAKE_SYSTEM_NAME : ${CMAKE_SYSTEM_NAME})
+message(CMAKE_SIZEOF_VOID_P : ${CMAKE_SIZEOF_VOID_P})
+
+set(OFX_ARCHITECTURE "")
+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+	if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+		set(OFX_ARCHITECTURE "Win32")
+	elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		set(OFX_ARCHITECTURE "Win64")
+	endif()
+elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+	if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+		set(OFX_ARCHITECTURE "Linux-x86")
+	elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		set(OFX_ARCHITECTURE "Linux-x86-64")
+	endif()
+elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+	if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+		set(OFX_ARCHITECTURE "MacOS")
+	elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		set(OFX_ARCHITECTURE "MacOS-x86-64")
+	endif()
+endif()
+
+message(OFX_ARCHITECTURE : ${OFX_ARCHITECTURE})
+set(OFX_ARCHITECTURE "${OFX_ARCHITECTURE}" CACHE STRING 
+	"operating system architecture the plug-in was built for"
+)
+
+
+###FractalNoise plugin
+add_library(
+	FractalNoise MODULE
+	FractalNoise.cpp
+	../openfx-API/Support/Library/ofxsMultiThread.cpp
+	../openfx-API/Support/Library/ofxsInteract.cpp
+	../openfx-API/Support/Library/ofxsProperty.cpp
+	../openfx-API/Support/Library/ofxsLog.cpp
+	../openfx-API/Support/Library/ofxsCore.cpp
+	../openfx-API/Support/Library/ofxsPropertyValidation.cpp
+	../openfx-API/Support/Library/ofxsImageEffect.cpp
+	../openfx-API/Support/Library/ofxsParams.cpp
+)
+
+# configuring FractalNoise includes path
+target_include_directories(
+	FractalNoise PRIVATE 
+	${LIBNOISE_INCLUDE_PATH} 
+	"../include" 
+	"../openfx-API/include" 
+	"../openfx-API/Support/include" 
+)
+
+#libraries needed by FractalNoise
+target_link_libraries(
+	FractalNoise
+	noise
+)
+
+
+set_target_properties(
+	FractalNoise PROPERTIES #target(s) PROPERTIES
+	PREFIX ""
+	SUFFIX ".ofx"
+)
+
+add_custom_command(
+	TARGET FractalNoise 
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E echo "Creating bundle FractalNoise.ofx.bundle"
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:FractalNoise> $<TARGET_FILE_DIR:FractalNoise>/FractalNoise.ofx.bundle/Contents/${OFX_ARCHITECTURE}/$<TARGET_FILE_NAME:FractalNoise> 
+)

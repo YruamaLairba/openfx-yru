@@ -499,7 +499,7 @@ namespace OFX
   {  
     void getPluginIDs(OFX::PluginFactoryArray &ids)
     {
-      static FractalNoisePluginFactory p("net.sf.openfx.invertPlugin", 1, 0);
+      static FractalNoisePluginFactory p("FractalNoise", 1, 0);
       ids.push_back(&p);
     }
   }

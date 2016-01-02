@@ -13,20 +13,26 @@ project (openfx-yru_FractalNoise)
 	# ../openfx-API/Support/Library/ofxsParams.cpp
 # )
 
+message(STATUS envCMAKE_LIBRARY_PATH : $ENV{CMAKE_LIBRARY_PATH})
+message(STATUS envLIB : $ENV{LIB})
+message(STATUS CMAKE_FIND_LIBRARY_SUFFIXES : ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
 ###libnoise path
-# try to find library
-find_library(LIBNOISE_LIB libnoise)
-message(LIBNOISE_LIB : ${LIBNOISE_LIB})
+# try to find header
+find_path(
+	LIBNOISE_INCLUDE_PATH
+	NAMES noise/noise.h
+)
+message(STATUS LIBNOISE_INCLUDE_PATH : ${LIBNOISE_INCLUDE_PATH})
 set(LIBNOISE_INCLUDE_PATH "" CACHE PATH "Path to the libnoise header ")
+# try to find library
+find_library(LIBNOISE_LIB noise)
+message(STATUS LIBNOISE_LIB : ${LIBNOISE_LIB})
 set(LIBNOISE_LIB "LIBNOISE_LIB" CACHE FILEPATH "path to the libnoise library ")
-get_filename_component(LIBNOISE_LIB_PATH LIBNOISE_LIB DIRECTORY CACHE)
-link_directories(${LIBNOISE_LIB_PATH})
 
 ###determine target architecture for packaging
-
-message(CMAKE_SYSTEM_NAME : ${CMAKE_SYSTEM_NAME})
-message(CMAKE_SIZEOF_VOID_P : ${CMAKE_SIZEOF_VOID_P})
+message(STATUS CMAKE_SYSTEM_NAME : ${CMAKE_SYSTEM_NAME})
+message(STATUS CMAKE_SIZEOF_VOID_P : ${CMAKE_SIZEOF_VOID_P})
 
 set(OFX_ARCHITECTURE "")
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
@@ -49,9 +55,9 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
 	endif()
 endif()
 
-message(OFX_ARCHITECTURE : ${OFX_ARCHITECTURE})
+message(STATUS OFX_ARCHITECTURE : ${OFX_ARCHITECTURE})
 set(OFX_ARCHITECTURE "${OFX_ARCHITECTURE}" CACHE STRING 
-	"operating system architecture the plug-in was built for"
+	"operating system architecture the plug-in is built for"
 )
 
 
@@ -81,19 +87,21 @@ target_include_directories(
 #libraries needed by FractalNoise
 target_link_libraries(
 	FractalNoise
-	noise
+	${LIBNOISE_LIB}
 )
 
-
+#avoid the "lib" prefix set extension to ofx
 set_target_properties(
-	FractalNoise PROPERTIES #target(s) PROPERTIES
+	FractalNoise PROPERTIES
 	PREFIX ""
 	SUFFIX ".ofx"
 )
 
+#create the bundle
 add_custom_command(
 	TARGET FractalNoise 
 	POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E echo "Creating bundle FractalNoise.ofx.bundle"
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/FractalNoise.png $<TARGET_FILE_DIR:FractalNoise>/FractalNoise.ofx.bundle/Contents/Resources/FractalNoise.png
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:FractalNoise> $<TARGET_FILE_DIR:FractalNoise>/FractalNoise.ofx.bundle/Contents/${OFX_ARCHITECTURE}/$<TARGET_FILE_NAME:FractalNoise> 
 )

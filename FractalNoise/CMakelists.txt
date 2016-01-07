@@ -105,3 +105,11 @@ add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/FractalNoise.png $<TARGET_FILE_DIR:FractalNoise>/FractalNoise.ofx.bundle/Contents/Resources/FractalNoise.png
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:FractalNoise> $<TARGET_FILE_DIR:FractalNoise>/FractalNoise.ofx.bundle/Contents/${OFX_ARCHITECTURE}/$<TARGET_FILE_NAME:FractalNoise> 
 )
+
+### installation
+message(STATUS PROJECT_BINARY_DIR : ${PROJECT_BINARY_DIR})
+
+install (
+	DIRECTORY "${PROJECT_BINARY_DIR}/FractalNoise.ofx.bundle"
+    DESTINATION .
+)

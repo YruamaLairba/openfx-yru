@@ -390,7 +390,8 @@ void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &de
         OFX::Double2DParamDescriptor* param = desc.defineDouble2DParam("position");
         param->setLabel("Position");
         param->setHint("Position");
-        param->setDefault(0.0,0.0);
+		param->setDefaultCoordinateSystem(eCoordinatesNormalised);
+        param->setDefault(0.5, 0.5);
         if (page) {
             page->addChild(*param);
         }

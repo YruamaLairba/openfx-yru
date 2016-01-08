@@ -104,32 +104,19 @@ public :
   // and do some processing
   void multiThreadProcessImages(OfxRectI procWindow)
   {
-    //noise::module::Perlin noiseGenerator;
-    
-    for(int y = procWindow.y1; y < procWindow.y2; y++) {
+    //go trough every lines
+	for(int y = procWindow.y1; y < procWindow.y2; y++) {
       if(_effect.abort()) break;
-
       PIX *dstPix = (PIX *) _dstImg->getPixelAddress(procWindow.x1, y);
-
-      for(int x = procWindow.x1; x < procWindow.x2; x++) {
-
-        PIX *srcPix = (PIX *)  (_srcImg ? _srcImg->getPixelAddress(x, y) : 0);
-
-        // do we have a source image to scale up
-        if(srcPix) {
-          for(int c = 0; c < nComponents; c++) {
-            dstPix[c]=(1.0+this->noiseGenerator.GetValue((x-posX)*freqX,(y-posY)*freqY,posZ))/2.0;
-            //dstPix[c] = max - srcPix[c];
-          }
+      //go through every pixels in the line
+	  for(int x = procWindow.x1; x < procWindow.x2; x++) {
+	    PIX value=(1.0+this->noiseGenerator.GetValue((x-posX)*freqX,(y-posY)*freqY,posZ))/2.0;
+        //go through every component in a pixel
+		for(int c = 0; c < nComponents; c++) {
+            //copy same value in each component
+			dstPix[c]=value;
         }
-        else {
-          // no src pixel here, be black and transparent
-          for(int c = 0; c < nComponents; c++) {
-            dstPix[c] = 0;
-          }
-        }
-
-        // increment the dst pixel
+        // increment to point the next dst pixel
         dstPix += nComponents;
       }
     }
@@ -361,6 +348,7 @@ void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &de
   srcClip->setTemporalClipAccess(false);
   srcClip->setSupportsTiles(true);
   srcClip->setIsMask(false);
+  srcClip->setOptional(true);
 
   // create the mandated output clip
   ClipDescriptor *dstClip = desc.defineClip(kOfxImageEffectOutputClipName);

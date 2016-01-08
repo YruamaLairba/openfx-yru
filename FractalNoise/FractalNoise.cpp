@@ -410,7 +410,7 @@ void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &de
         OFX::Double2DParamDescriptor* param = desc.defineDouble2DParam("frequency");
         param->setLabel("Frequency");
         param->setHint("Frequency");
-        param->setDefault(0.0,0.0);
+        param->setDefault(0.05,0.05);
         if (page) {
             page->addChild(*param);
         }
@@ -420,7 +420,7 @@ void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &de
         OFX::DoubleParamDescriptor* param = desc.defineDoubleParam("lacunarity");
         param->setLabel("Lacunarity");
         param->setHint("Lacunarity");
-        param->setDefault(0.0);
+        param->setDefault(noise::module::DEFAULT_PERLIN_LACUNARITY);
         if (page) {
             page->addChild(*param);
         }
@@ -430,7 +430,7 @@ void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &de
         OFX::IntParamDescriptor* param = desc.defineIntParam("nbOctave");
         param->setLabel("Number of octave");
         param->setHint("Number of octave");
-        param->setDefault(0);
+        param->setDefault(noise::module::DEFAULT_PERLIN_OCTAVE_COUNT);
         if (page) {
             page->addChild(*param);
         }
@@ -440,7 +440,7 @@ void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &de
         OFX::DoubleParamDescriptor* param = desc.defineDoubleParam("persistence");
         param->setLabel("persistence");
         param->setHint("persistence");
-        param->setDefault(0);
+        param->setDefault(noise::module::DEFAULT_PERLIN_PERSISTENCE);
         if (page) {
             page->addChild(*param);
         }

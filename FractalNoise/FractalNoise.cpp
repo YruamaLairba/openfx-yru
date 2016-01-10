@@ -45,16 +45,6 @@ protected :
   
   //freqency X and Y
   float freqX, freqY;
-  /*
-  //lacunarity
-  float lacunarity;
-  
-  //number of Octave
-  int nbOctave;
-  
-  //persistence
-  float persistence;
-  */
   
   //noise generator
   noise::module::Perlin noiseGenerator;
@@ -104,17 +94,22 @@ public :
   // and do some processing
   void multiThreadProcessImages(OfxRectI procWindow)
   {
+    //Renderscale management
+    float ScaledFreqX = freqX /(_dstImg->getRenderScale().x);
+    float ScaledFreqY = freqY /(_dstImg->getRenderScale().y);
+    float ScaledPosX = posX *(_dstImg->getRenderScale().x);
+    float ScaledPosY = posY *(_dstImg->getRenderScale().y);
     //go trough every lines
-	for(int y = procWindow.y1; y < procWindow.y2; y++) {
+    for(int y = procWindow.y1; y < procWindow.y2; y++) {
       if(_effect.abort()) break;
       PIX *dstPix = (PIX *) _dstImg->getPixelAddress(procWindow.x1, y);
       //go through every pixels in the line
-	  for(int x = procWindow.x1; x < procWindow.x2; x++) {
-	    PIX value=(1.0+this->noiseGenerator.GetValue((x-posX)*freqX,(y-posY)*freqY,posZ))/2.0;
+      for(int x = procWindow.x1; x < procWindow.x2; x++) {
+        PIX value=(1.0+this->noiseGenerator.GetValue((x-ScaledPosX)*ScaledFreqX,(y-ScaledPosY)*ScaledFreqY,posZ))/2.0;
         //go through every component in a pixel
-		for(int c = 0; c < nComponents; c++) {
-            //copy same value in each component
-			dstPix[c]=value;
+        for(int c = 0; c < nComponents; c++) {
+          //copy same value in each component
+          dstPix[c]=value;
         }
         // increment to point the next dst pixel
         dstPix += nComponents;

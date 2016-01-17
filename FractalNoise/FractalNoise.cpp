@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 // Base class for the RGBA and the Alpha processor
-class FractalNoiseBase : public OFX::ImageProcessor {
+class FractalNoiseProcessorBase : public OFX::ImageProcessor {
 protected :
   OFX::Image *_srcImg;
   
@@ -50,7 +50,7 @@ protected :
   noise::module::Perlin noiseGenerator;
 public :
   /** @brief no arg ctor */
-  FractalNoiseBase(OFX::ImageEffect &instance)
+  FractalNoiseProcessorBase(OFX::ImageEffect &instance)
     : OFX::ImageProcessor(instance)
     , _srcImg(0)
     , posX(0)
@@ -84,11 +84,11 @@ public :
 
 // template to do the RGBA processing
 template <class PIX, int nComponents, int max>
-class ImageInverter : public FractalNoiseBase {
+class FractalNoiseProcessor : public FractalNoiseProcessorBase {
 public :
   // ctor
-  ImageInverter(OFX::ImageEffect &instance) 
-    : FractalNoiseBase(instance)
+  FractalNoiseProcessor(OFX::ImageEffect &instance) 
+    : FractalNoiseProcessorBase(instance)
   {}
 
   // and do some processing
@@ -166,7 +166,7 @@ public :
   virtual void render(const OFX::RenderArguments &args);
 
   /* set up and run a processor */
-  void setupAndProcess(FractalNoiseBase &, const OFX::RenderArguments &args);
+  void setupAndProcess(FractalNoiseProcessorBase &, const OFX::RenderArguments &args);
 };
 
 
@@ -179,7 +179,7 @@ public :
 
 /* set up and run a processor */
 void
-FractalNoisePlugin::setupAndProcess(FractalNoiseBase &processor, const OFX::RenderArguments &args)
+FractalNoisePlugin::setupAndProcess(FractalNoiseProcessorBase &processor, const OFX::RenderArguments &args)
 {
   // get a dst image
   std::auto_ptr<OFX::Image> dst(dstClip_->fetchImage(args.time));
@@ -256,19 +256,19 @@ FractalNoisePlugin::render(const OFX::RenderArguments &args)
     switch(dstBitDepth) {
 /*
 case OFX::eBitDepthUByte : {      
-  ImageInverter<unsigned char, 4, 255> fred(*this);
+  FractalNoiseProcessor<unsigned char, 4, 255> fred(*this);
   setupAndProcess(fred, args);
                            }
                            break;
 
 case OFX::eBitDepthUShort : {
-  ImageInverter<unsigned short, 4, 65535> fred(*this);
+  FractalNoiseProcessor<unsigned short, 4, 65535> fred(*this);
   setupAndProcess(fred, args);
                             }                          
                             break;
 */
 case OFX::eBitDepthFloat : {
-  ImageInverter<float, 4, 1> fred(*this);
+  FractalNoiseProcessor<float, 4, 1> fred(*this);
   setupAndProcess(fred, args);
                            }
                            break;
@@ -279,19 +279,19 @@ default :
   else {
     switch(dstBitDepth) {
 case OFX::eBitDepthUByte : {
-  ImageInverter<unsigned char, 1, 255> fred(*this);
+  FractalNoiseProcessor<unsigned char, 1, 255> fred(*this);
   setupAndProcess(fred, args);
                            }
                            break;
 
 case OFX::eBitDepthUShort : {
-  ImageInverter<unsigned short, 1, 65535> fred(*this);
+  FractalNoiseProcessor<unsigned short, 1, 65535> fred(*this);
   setupAndProcess(fred, args);
                             }                          
                             break;
 
 case OFX::eBitDepthFloat : {
-  ImageInverter<float, 1, 1> fred(*this);
+  FractalNoiseProcessor<float, 1, 1> fred(*this);
   setupAndProcess(fred, args);
                            }                          
                            break;

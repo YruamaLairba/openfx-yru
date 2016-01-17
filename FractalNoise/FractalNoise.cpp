@@ -162,6 +162,11 @@ public :
     
   }
 
+private:
+  /* Internal render, used for code factorization */
+  template <int nComponents>
+  void renderInternal(const OFX::RenderArguments &args, OFX::BitDepthEnum dstBitDepth);
+ 
   /* Override the render */
   virtual void render(const OFX::RenderArguments &args);
 
@@ -243,6 +248,33 @@ FractalNoisePlugin::setupAndProcess(FractalNoiseProcessorBase &processor, const 
   processor.process();
 }
 
+// the internal render function
+template <int nComponents>
+void
+FractalNoisePlugin::renderInternal(const OFX::RenderArguments &args, OFX::BitDepthEnum dstBitDepth)
+{
+    switch (dstBitDepth) {
+        case OFX::eBitDepthUByte: {
+            FractalNoiseProcessor<unsigned char, nComponents, 255> fred(*this);
+            setupAndProcess(fred, args);
+            break;
+        }
+        case OFX::eBitDepthUShort: {
+            FractalNoiseProcessor<unsigned short, nComponents, 65535> fred(*this);
+            setupAndProcess(fred, args);
+            break;
+        }
+        case OFX::eBitDepthFloat: {
+            FractalNoiseProcessor<float, nComponents, 1> fred(*this);
+            setupAndProcess(fred, args);
+            break;
+        }
+        default:
+		    setPersistentMessage(OFX::Message::eMessageError, "", "Unsupported bit depth");
+            OFX::throwSuiteStatusException(kOfxStatErrUnsupported);
+    }
+}
+
 // the overridden render function
 void
 FractalNoisePlugin::render(const OFX::RenderArguments &args)
@@ -251,59 +283,29 @@ FractalNoisePlugin::render(const OFX::RenderArguments &args)
   OFX::BitDepthEnum       dstBitDepth    = dstClip_->getPixelDepth();
   OFX::PixelComponentEnum dstComponents  = dstClip_->getPixelComponents();
 
-  // do the rendering
-  if(dstComponents == OFX::ePixelComponentRGBA) {
-    switch(dstBitDepth) {
-/*
-case OFX::eBitDepthUByte : {      
-  FractalNoiseProcessor<unsigned char, 4, 255> fred(*this);
-  setupAndProcess(fred, args);
-                           }
-                           break;
-
-case OFX::eBitDepthUShort : {
-  FractalNoiseProcessor<unsigned short, 4, 65535> fred(*this);
-  setupAndProcess(fred, args);
-                            }                          
-                            break;
-*/
-case OFX::eBitDepthFloat : {
-  FractalNoiseProcessor<float, 4, 1> fred(*this);
-  setupAndProcess(fred, args);
-                           }
-                           break;
-default :
-  OFX::throwSuiteStatusException(kOfxStatErrUnsupported);
+    // do the rendering
+	if (dstComponents == OFX::ePixelComponentRGBA) {
+        renderInternal<4>(args, dstBitDepth);
+    } 
+	else if (dstComponents == OFX::ePixelComponentRGB) {
+        renderInternal<3>(args, dstBitDepth);
+    } 
+	/*else if (dstComponents == OFX::ePixelComponentXY) {
+        renderInternal<2>(args, dstBitDepth);
+    }*/
+	else if (dstComponents == OFX::ePixelComponentAlpha) {
+        renderInternal<1>(args, dstBitDepth);
     }
-  }
-  else {
-    switch(dstBitDepth) {
-case OFX::eBitDepthUByte : {
-  FractalNoiseProcessor<unsigned char, 1, 255> fred(*this);
-  setupAndProcess(fred, args);
-                           }
-                           break;
-
-case OFX::eBitDepthUShort : {
-  FractalNoiseProcessor<unsigned short, 1, 65535> fred(*this);
-  setupAndProcess(fred, args);
-                            }                          
-                            break;
-
-case OFX::eBitDepthFloat : {
-  FractalNoiseProcessor<float, 1, 1> fred(*this);
-  setupAndProcess(fred, args);
-                           }                          
-                           break;
-default :
-  OFX::throwSuiteStatusException(kOfxStatErrUnsupported);
-    }
-  } 
+	else {
+		setPersistentMessage(OFX::Message::eMessageError, "", "Wrong number of components");
+		OFX::throwSuiteStatusException(kOfxStatErrUnsupported);
+	}
 }
 
-mDeclarePluginFactory(FractalNoisePluginFactory, {}, {});
 
 using namespace OFX;
+mDeclarePluginFactory(FractalNoisePluginFactory, {}, {});
+
 void FractalNoisePluginFactory::describe(OFX::ImageEffectDescriptor &desc)
 {
   // basic labels
@@ -317,8 +319,8 @@ void FractalNoisePluginFactory::describe(OFX::ImageEffectDescriptor &desc)
   desc.addSupportedContext(eContextPaint);
 
   // add supported pixel depths
-  //desc.addSupportedBitDepth(eBitDepthUByte);
-  //desc.addSupportedBitDepth(eBitDepthUShort);
+  desc.addSupportedBitDepth(eBitDepthUByte);
+  desc.addSupportedBitDepth(eBitDepthUShort);
   desc.addSupportedBitDepth(eBitDepthFloat);
 
   // set a few flags

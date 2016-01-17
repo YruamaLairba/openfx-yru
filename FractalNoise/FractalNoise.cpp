@@ -334,8 +334,10 @@ void FractalNoisePluginFactory::describe(OFX::ImageEffectDescriptor &desc)
 
 }
 
-void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc, OFX::ContextEnum context)
+void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc , OFX::ContextEnum context)
 {
+  //Silent "unused parameter" warning on the context variable
+  (void)context;
   // Source clip only in the filter context
   // create the mandated source clip
   ClipDescriptor *srcClip = desc.defineClip(kOfxImageEffectSimpleSourceClipName);
@@ -354,20 +356,6 @@ void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &de
   dstClip->addSupportedComponent(ePixelComponentAlpha);
   dstClip->setSupportsTiles(true);
   
-  
-  if (context == eContextGeneral || context == eContextPaint) 
-  {
-    ClipDescriptor *maskClip = context == eContextGeneral ? desc.defineClip("Mask") : desc.defineClip("Brush");
-    maskClip->addSupportedComponent(ePixelComponentAlpha);
-    maskClip->setTemporalClipAccess(false);
-    if (context == eContextGeneral) 
-	{
-      maskClip->setOptional(true);
-    }
-    maskClip->setSupportsTiles(true);
-    maskClip->setIsMask(true);
-  }
-
   PageParamDescriptor *page = desc.definePageParam("Controls");
 
     //Position
@@ -438,47 +426,6 @@ void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &de
             page->addChild(*param);
         }
     }
-    
-    {
-        OFX::BooleanParamDescriptor* param = desc.defineBooleanParam("R");
-        param->setLabel("Rouge");
-        param->setHint("Traiter le canal");
-        param->setDefault(true);
-        //param->setLayoutHint(eLayoutHintNoNewLine);
-        if (page) {
-            page->addChild(*param);
-        }
-    }
-    {
-        OFX::BooleanParamDescriptor* param = desc.defineBooleanParam("G");
-        param->setLabel("Vert");
-        param->setHint("Traiter le canal");
-        param->setDefault(true);
-        //param->setLayoutHint(eLayoutHintNoNewLine);
-        if (page) {
-            page->addChild(*param);
-        }
-    }
-    {
-        OFX::BooleanParamDescriptor* param = desc.defineBooleanParam("B");
-        param->setLabel("Bleu");
-        param->setHint("Traiter le canal");
-        param->setDefault(true);
-        //param->setLayoutHint(eLayoutHintNoNewLine);
-        if (page) {
-            page->addChild(*param);
-        }
-    }
-    {
-        OFX::BooleanParamDescriptor* param = desc.defineBooleanParam("A");
-        param->setLabel("Alpha");
-        param->setHint("Traiter le canal");
-        param->setDefault(true);
-        if (page) {
-            page->addChild(*param);
-        }
-    }
-	
 }
 
 OFX::ImageEffect* FractalNoisePluginFactory::createInstance(OfxImageEffectHandle handle, OFX::ContextEnum /*context*/)

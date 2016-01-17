@@ -152,13 +152,13 @@ public :
   {
     dstClip_ = fetchClip(kOfxImageEffectOutputClipName);
     srcClip_ = fetchClip(kOfxImageEffectSimpleSourceClipName);
-    position_ = fetchDouble2DParam("position");
-    evolution_ = fetchDoubleParam("evolution");
-    frequency_ = fetchDouble2DParam("frequency");
+    position_ = fetchDouble2DParam("Position");
+    evolution_ = fetchDoubleParam("Evolution");
+    frequency_ = fetchDouble2DParam("Frequency");
     
-    lacunarity_ = fetchDoubleParam("lacunarity");
-    nbOctave_ = fetchIntParam("nbOctave");
-    persistence_ = fetchDoubleParam("persistence");
+    lacunarity_ = fetchDoubleParam("Lacunarity");
+    nbOctave_ = fetchIntParam("Number of Octaves");
+    persistence_ = fetchDoubleParam("Persistence");
     
   }
 
@@ -372,61 +372,68 @@ void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &de
 
     //Position
     {
-        OFX::Double2DParamDescriptor* param = desc.defineDouble2DParam("position");
+        OFX::Double2DParamDescriptor* param = desc.defineDouble2DParam("Position");
         param->setLabel("Position");
-        param->setHint("Position");
+        param->setHint("Change the center of the noise. This center can be visualized when changing the frequency.");
 		param->setDefaultCoordinateSystem(eCoordinatesNormalised);
         param->setDefault(0.5, 0.5);
+		param->setDisplayRange(-10000,-10000,10000,10000);
+		
         if (page) {
             page->addChild(*param);
         }
     }
     //Evolution
     {
-        OFX::DoubleParamDescriptor* param = desc.defineDoubleParam("evolution");
+        OFX::DoubleParamDescriptor* param = desc.defineDoubleParam("Evolution");
         param->setLabel("Evolution");
-        param->setHint("Evolution");
+        param->setHint("Slowly Animate this parameter give a morphing effect to the noise.");
         param->setDefault(0.0);
+		param->setDisplayRange(0,10);
         if (page) {
             page->addChild(*param);
         }
     }
     //Frequency
     {
-        OFX::Double2DParamDescriptor* param = desc.defineDouble2DParam("frequency");
+        OFX::Double2DParamDescriptor* param = desc.defineDouble2DParam("Frequency");
         param->setLabel("Frequency");
-        param->setHint("Frequency");
+        param->setHint("Set the base frequency in pixel.");
         param->setDefault(0.05,0.05);
+		param->setDisplayRange(0,0,0.5,0.5);
         if (page) {
             page->addChild(*param);
         }
     }
     //Lacunarity
     {
-        OFX::DoubleParamDescriptor* param = desc.defineDoubleParam("lacunarity");
+        OFX::DoubleParamDescriptor* param = desc.defineDoubleParam("Lacunarity");
         param->setLabel("Lacunarity");
-        param->setHint("Lacunarity");
+        param->setHint("Set frequency scale between Octaves.");
         param->setDefault(noise::module::DEFAULT_PERLIN_LACUNARITY);
+		param->setDisplayRange(1,5);
         if (page) {
             page->addChild(*param);
         }
     }
     //Number of Octave
     {
-        OFX::IntParamDescriptor* param = desc.defineIntParam("nbOctave");
-        param->setLabel("Number of octave");
-        param->setHint("Number of octave");
+        OFX::IntParamDescriptor* param = desc.defineIntParam("Number of Octaves");
+        param->setLabel("nbOctaves");
+        param->setHint("Just the number of octaves to combine.");
         param->setDefault(noise::module::DEFAULT_PERLIN_OCTAVE_COUNT);
+		param->setDisplayRange(1,10);
         if (page) {
             page->addChild(*param);
         }
     }
     //persistence
     {
-        OFX::DoubleParamDescriptor* param = desc.defineDoubleParam("persistence");
-        param->setLabel("persistence");
-        param->setHint("persistence");
+        OFX::DoubleParamDescriptor* param = desc.defineDoubleParam("Persistence");
+        param->setLabel("Persistence");
+        param->setHint("Set the amplitude scale between Octaves");
         param->setDefault(noise::module::DEFAULT_PERLIN_PERSISTENCE);
+		param->setDisplayRange(0,1);
         if (page) {
             page->addChild(*param);
         }

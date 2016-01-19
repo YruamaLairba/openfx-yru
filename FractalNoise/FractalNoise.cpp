@@ -105,12 +105,32 @@ public :
       PIX *dstPix = (PIX *) _dstImg->getPixelAddress(procWindow.x1, y);
       //go through every pixels in the line
       for(int x = procWindow.x1; x < procWindow.x2; x++) {
-        PIX value=(1.0+this->noiseGenerator.GetValue((x-ScaledPosX)*ScaledFreqX,(y-ScaledPosY)*ScaledFreqY,posZ))/2.0;
-        //go through every component in a pixel
-        for(int c = 0; c < nComponents; c++) {
-          //copy same value in each component
-          dstPix[c]=value;
-        }
+        float valuef=max*(1.0+this->noiseGenerator.GetValue((x-ScaledPosX)*ScaledFreqX,(y-ScaledPosY)*ScaledFreqY,posZ))/2.0;
+		// max = 1 implies Float, don't clamp 
+		if (max == 1){
+          //go through every component in a pixel
+          for(int c = 0; c < nComponents; c++) {
+            //copy same value in each component
+            dstPix[c]=(PIX)valuef;
+          }
+		}
+		// clamp needed whith integer 
+		else{
+		  //go through every component in a pixel
+          for(int c = 0; c < nComponents; c++) {
+            //ceil
+			if (valuef > max){
+			  dstPix[c]=(PIX) max;
+			}
+			//floor
+			else if (valuef < 0){
+			  dstPix[c]=(PIX) 0;
+			}
+			else {
+			  dstPix[c]=(PIX)valuef;
+			}
+          }
+		}
         // increment to point the next dst pixel
         dstPix += nComponents;
       }
@@ -311,7 +331,7 @@ void FractalNoisePluginFactory::describe(OFX::ImageEffectDescriptor &desc)
   // basic labels
   desc.setLabels("FractalNoise", "FractalNoise", "FractalNoise");
   desc.setPluginGrouping("Yru");
-  desc.setPluginDescription("FractalNoise pixels value of the image");
+  desc.setPluginDescription("FractalNoise generator");
 
   // add the supported contexts, only filter at the moment
   desc.addSupportedContext(eContextFilter);

@@ -46,6 +46,9 @@ protected :
   //freqency X and Y
   float freqX, freqY;
   
+  //amplitude
+  float amplitude;
+  
   //noise generator
   noise::module::Perlin noiseGenerator;
 public :
@@ -58,6 +61,7 @@ public :
     , posZ(0)
     , freqX(0)
     , freqY(0)
+    , amplitude(0)
     /*
     , lacunarity(0)
     , nbOctave(0)
@@ -71,6 +75,7 @@ public :
   void setPosZ(float value){posZ = value ;}
   void setFreqX(float value){freqX = value ;}
   void setFreqY(float value){freqY = value ;}
+  void setAmplitude(float value){amplitude = value ;}
   
   void setLacunarity(double value){noiseGenerator.SetLacunarity(value);}
   void setNbOctave(int value){noiseGenerator.SetOctaveCount(value);}
@@ -105,7 +110,7 @@ public :
       PIX *dstPix = (PIX *) _dstImg->getPixelAddress(procWindow.x1, y);
       //go through every pixels in the line
       for(int x = procWindow.x1; x < procWindow.x2; x++) {
-        float valuef=max*(1.0+this->noiseGenerator.GetValue((x-ScaledPosX)*ScaledFreqX,(y-ScaledPosY)*ScaledFreqY,posZ))/2.0;
+        float valuef=max*(0.5+amplitude*this->noiseGenerator.GetValue((x-ScaledPosX)*ScaledFreqX,(y-ScaledPosY)*ScaledFreqY,posZ));
 		// max = 1 implies Float, don't clamp 
 		if (max == 1){
           //go through every component in a pixel
@@ -152,6 +157,7 @@ protected :
   OFX::DoubleParam *lacunarity_;
   OFX::IntParam *nbOctave_;
   OFX::DoubleParam *persistence_;
+  OFX::DoubleParam *amplitude_;
   
   
   //the noise generator
@@ -169,6 +175,7 @@ public :
     , lacunarity_(0)
     , nbOctave_(0)
     , persistence_(0)
+	, amplitude_(0)
   {
     dstClip_ = fetchClip(kOfxImageEffectOutputClipName);
     srcClip_ = fetchClip(kOfxImageEffectSimpleSourceClipName);
@@ -179,6 +186,7 @@ public :
     lacunarity_ = fetchDoubleParam("Lacunarity");
     nbOctave_ = fetchIntParam("Number of Octaves");
     persistence_ = fetchDoubleParam("Persistence");
+	amplitude_ = fetchDoubleParam("Amplitude");
     
   }
 
@@ -260,6 +268,11 @@ FractalNoisePlugin::setupAndProcess(FractalNoiseProcessorBase &processor, const 
   double persistence;
   persistence_->getValueAtTime(args.time, persistence);
   processor.setPersistence(persistence);
+  
+  //set persistence
+  double amplitude;
+  amplitude_->getValueAtTime(args.time, amplitude);
+  processor.setAmplitude(amplitude);
   
   // set the render window
   processor.setRenderWindow(args.renderWindow);
@@ -441,6 +454,17 @@ void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &de
         param->setLabel("Persistence");
         param->setHint("Set the amplitude scale between Octaves");
         param->setDefault(noise::module::DEFAULT_PERLIN_PERSISTENCE);
+		param->setDisplayRange(0,1);
+        if (page) {
+            page->addChild(*param);
+        }
+    }
+    //amplitude
+    {
+        OFX::DoubleParamDescriptor* param = desc.defineDoubleParam("Amplitude");
+        param->setLabel("Amplitude");
+        param->setHint("Set the amplitude of the first octave.");
+        param->setDefault(0.5);
 		param->setDisplayRange(0,1);
         if (page) {
             page->addChild(*param);

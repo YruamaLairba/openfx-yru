@@ -37,6 +37,8 @@ class FractalNoiseProcessorBase : public OFX::ImageProcessor {
 protected :
   OFX::Image *_srcImg;
   
+  OfxPointD renderScale;
+  
   //position of noise
   float posX, posY;
   
@@ -73,6 +75,7 @@ public :
   {        
   }
   //setters
+  void setRenderScale(OfxPointD value){renderScale = value;}
   void setPosX(float value){posX = value ;}
   void setPosY(float value){posY = value ;}
   void setPosZ(float value){posZ = value ;}
@@ -84,8 +87,8 @@ public :
   void setLacunarity(double value){noiseGenerator.SetLacunarity(value);}
   void setNbOctave(int value){noiseGenerator.SetOctaveCount(value);}
   void setPersistence(double value){noiseGenerator.SetPersistence(value);}
-  
-  
+  void setSeed(int value){noiseGenerator.SetSeed(value);}
+  void setNoiseQuality(noise::NoiseQuality quality){noiseGenerator.SetNoiseQuality(quality);}
   
   /** @brief set the src image */
   void setSrcImg(OFX::Image *v) {_srcImg = v;}
@@ -104,10 +107,10 @@ public :
   void multiThreadProcessImages(OfxRectI procWindow)
   {
     //Renderscale management
-    float ScaledFreqX = freqX /(_dstImg->getRenderScale().x);
-    float ScaledFreqY = freqY /(_dstImg->getRenderScale().y);
-    float ScaledPosX = posX *(_dstImg->getRenderScale().x);
-    float ScaledPosY = posY *(_dstImg->getRenderScale().y);
+    float ScaledFreqX = freqX /renderScale.x;
+    float ScaledFreqY = freqY /renderScale.y;
+    float ScaledPosX = posX *renderScale.x;
+    float ScaledPosY = posY *renderScale.y;
     //go trough every lines
     for(int y = procWindow.y1; y < procWindow.y2; y++) {
       if(_effect.abort()) break;
@@ -163,7 +166,8 @@ protected :
   OFX::DoubleParam *persistence_;
   OFX::DoubleParam *amplitude_;
   OFX::DoubleParam *offset_;
-  
+  OFX::IntParam *seed_;
+  OFX::ChoiceParam *quality_;
   
   //the noise generator
   //noise::module::Perlin noiseGenerator;
@@ -182,6 +186,8 @@ public :
     , persistence_(0)
 	, amplitude_(0)
     , offset_(0)
+    , seed_(0)
+    , quality_(0)
   {
     dstClip_ = fetchClip(kOfxImageEffectOutputClipName);
     srcClip_ = fetchClip(kOfxImageEffectSimpleSourceClipName);
@@ -194,6 +200,8 @@ public :
     persistence_ = fetchDoubleParam("Persistence");
 	amplitude_ = fetchDoubleParam("Amplitude");
     offset_ = fetchDoubleParam("Offset");
+    seed_ = fetchIntParam("Seed");
+    quality_ = fetchChoiceParam("Quality");
     
   }
 
@@ -243,6 +251,9 @@ FractalNoisePlugin::setupAndProcess(FractalNoiseProcessorBase &processor, const 
   processor.setDstImg(dst.get());
   processor.setSrcImg(src.get());
   
+  // set the renderScale
+  processor.setRenderScale(args.renderScale);
+  
   // set position
   double posX;
   double posY;
@@ -285,6 +296,21 @@ FractalNoisePlugin::setupAndProcess(FractalNoiseProcessorBase &processor, const 
   double offset;
   offset_->getValueAtTime(args.time, offset);
   processor.setOffset(offset);
+  
+  //set the seed
+  int seed;
+  seed_->getValueAtTime(args.time, seed);
+  processor.setSeed(seed);
+  
+  //set the quality. we get a number corresponding to the choice 
+  int qualityChoice;
+  quality_->getValueAtTime(args.time, qualityChoice);
+  //first choice
+  if (qualityChoice == 0) processor.setNoiseQuality(noise::QUALITY_FAST);
+  //second choice
+  else if (qualityChoice == 1) processor.setNoiseQuality(noise::QUALITY_STD);
+  //third choice
+  else if (qualityChoice == 2) processor.setNoiseQuality(noise::QUALITY_BEST);
   
   // set the render window
   processor.setRenderWindow(args.renderWindow);
@@ -493,6 +519,35 @@ void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &de
             page->addChild(*param);
         }
     }
+    //Seed
+    {
+        OFX::IntParamDescriptor* param = desc.defineIntParam("Seed");
+        param->setLabel("Seed");
+        param->setHint("Seed used to generate the noise.");
+        param->setDefault(noise::module::DEFAULT_PERLIN_SEED);
+        param->setDisplayRange(0,65535);
+        param->setAnimates(false);
+        if (page) {
+            page->addChild(*param);
+        }
+    }
+    //Quality
+    {
+        OFX::ChoiceParamDescriptor* param = desc.defineChoiceParam("Quality");
+        param->setLabel("Qualtity");
+        param->appendOption("QUALITY_FAST", "FAST");
+        param->appendOption("QUALITY_STD", "STD");
+        param->appendOption("QUALITY_BEST", "BEST");
+        //I set hint after appending options to not have
+        //options labels and descriptions inside the hint
+        param->setHint("Select interpolation quality");
+        param->setDefault(1);
+        param->setAnimates(false);
+        if (page) {
+            page->addChild(*param);
+        }
+    }
+    
 }
 
 OFX::ImageEffect* FractalNoisePluginFactory::createInstance(OfxImageEffectHandle handle, OFX::ContextEnum /*context*/)

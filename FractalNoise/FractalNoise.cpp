@@ -67,11 +67,6 @@ public :
     , freqX(0)
     , freqY(0)
     , amplitude(0)
-    /*
-    , lacunarity(0)
-    , nbOctave(0)
-    , persistence(0)
-    */
   {        
   }
   //setters
@@ -169,9 +164,6 @@ protected :
   OFX::IntParam *seed_;
   OFX::ChoiceParam *quality_;
   
-  //the noise generator
-  //noise::module::Perlin noiseGenerator;
-
 public :
   /** @brief ctor */
   FractalNoisePlugin(OfxImageEffectHandle handle)
@@ -361,9 +353,6 @@ FractalNoisePlugin::render(const OFX::RenderArguments &args)
 	else if (dstComponents == OFX::ePixelComponentRGB) {
         renderInternal<3>(args, dstBitDepth);
     } 
-	/*else if (dstComponents == OFX::ePixelComponentXY) {
-        renderInternal<2>(args, dstBitDepth);
-    }*/
 	else if (dstComponents == OFX::ePixelComponentAlpha) {
         renderInternal<1>(args, dstBitDepth);
     }

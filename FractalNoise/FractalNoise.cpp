@@ -67,6 +67,7 @@ public :
     , freqX(0)
     , freqY(0)
     , amplitude(0)
+    , offset(0)
   {        
   }
   //setters
@@ -113,31 +114,31 @@ public :
       //go through every pixels in the line
       for(int x = procWindow.x1; x < procWindow.x2; x++) {
         float valuef=max*(offset+amplitude*this->noiseGenerator.GetValue((x-ScaledPosX)*ScaledFreqX,(y-ScaledPosY)*ScaledFreqY,posZ));
-		// max = 1 implies Float, don't clamp 
-		if (max == 1){
+        // max = 1 implies Float, don't clamp 
+        if (max == 1){
           //go through every component in a pixel
           for(int c = 0; c < nComponents; c++) {
             //copy same value in each component
             dstPix[c]=(PIX)valuef;
           }
-		}
-		// clamp needed whith integer 
-		else{
-		  //go through every component in a pixel
+        }
+        // clamp needed whith integer 
+        else{
+          //go through every component in a pixel
           for(int c = 0; c < nComponents; c++) {
             //ceil
-			if (valuef > max){
-			  dstPix[c]=(PIX) max;
-			}
-			//floor
-			else if (valuef < 0){
-			  dstPix[c]=(PIX) 0;
-			}
-			else {
-			  dstPix[c]=(PIX)valuef;
-			}
+            if (valuef > max){
+              dstPix[c]=(PIX) max;
+            }
+            //floor
+            else if (valuef < 0){
+              dstPix[c]=(PIX) 0;
+            }
+            else {
+              dstPix[c]=(PIX)valuef;
+            }
           }
-		}
+        }
         // increment to point the next dst pixel
         dstPix += nComponents;
       }
@@ -176,7 +177,7 @@ public :
     , lacunarity_(0)
     , nbOctave_(0)
     , persistence_(0)
-	, amplitude_(0)
+    , amplitude_(0)
     , offset_(0)
     , seed_(0)
     , quality_(0)
@@ -190,7 +191,7 @@ public :
     lacunarity_ = fetchDoubleParam("Lacunarity");
     nbOctave_ = fetchIntParam("Number of Octaves");
     persistence_ = fetchDoubleParam("Persistence");
-	amplitude_ = fetchDoubleParam("Amplitude");
+    amplitude_ = fetchDoubleParam("Amplitude");
     offset_ = fetchDoubleParam("Offset");
     seed_ = fetchIntParam("Seed");
     quality_ = fetchChoiceParam("Quality");
@@ -333,7 +334,7 @@ FractalNoisePlugin::renderInternal(const OFX::RenderArguments &args, OFX::BitDep
             break;
         }
         default:
-		    setPersistentMessage(OFX::Message::eMessageError, "", "Unsupported bit depth");
+            setPersistentMessage(OFX::Message::eMessageError, "", "Unsupported bit depth");
             OFX::throwSuiteStatusException(kOfxStatErrUnsupported);
     }
 }
@@ -347,19 +348,19 @@ FractalNoisePlugin::render(const OFX::RenderArguments &args)
   OFX::PixelComponentEnum dstComponents  = dstClip_->getPixelComponents();
 
     // do the rendering
-	if (dstComponents == OFX::ePixelComponentRGBA) {
+    if (dstComponents == OFX::ePixelComponentRGBA) {
         renderInternal<4>(args, dstBitDepth);
     } 
-	else if (dstComponents == OFX::ePixelComponentRGB) {
+    else if (dstComponents == OFX::ePixelComponentRGB) {
         renderInternal<3>(args, dstBitDepth);
     } 
-	else if (dstComponents == OFX::ePixelComponentAlpha) {
+    else if (dstComponents == OFX::ePixelComponentAlpha) {
         renderInternal<1>(args, dstBitDepth);
     }
-	else {
-		setPersistentMessage(OFX::Message::eMessageError, "", "Wrong number of components");
-		OFX::throwSuiteStatusException(kOfxStatErrUnsupported);
-	}
+    else {
+        setPersistentMessage(OFX::Message::eMessageError, "", "Wrong number of components");
+        OFX::throwSuiteStatusException(kOfxStatErrUnsupported);
+    }
 }
 
 

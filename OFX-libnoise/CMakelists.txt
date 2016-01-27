@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project (openfx-yru_FractalNoise)
+project (openfx-yru_OFX-libnoise)
 
 ###compiling OFX_SUPPORT
 # add_library(
@@ -61,10 +61,10 @@ set(OFX_ARCHITECTURE "${OFX_ARCHITECTURE}" CACHE STRING
 )
 
 
-###FractalNoise plugin
+###OFX-libnoise plugin
 add_library(
-	FractalNoise MODULE
-	FractalNoise.cpp
+	OFX-libnoise MODULE
+	Perlin.cpp
 	../openfx-API/Support/Library/ofxsMultiThread.cpp
 	../openfx-API/Support/Library/ofxsInteract.cpp
 	../openfx-API/Support/Library/ofxsProperty.cpp
@@ -75,41 +75,41 @@ add_library(
 	../openfx-API/Support/Library/ofxsParams.cpp
 )
 
-# configuring FractalNoise includes path
+# configuring OFX-libnoise includes path
 target_include_directories(
-	FractalNoise PRIVATE 
+	OFX-libnoise PRIVATE 
 	${LIBNOISE_INCLUDE_PATH} 
 	"../include" 
 	"../openfx-API/include" 
 	"../openfx-API/Support/include" 
 )
 
-#libraries needed by FractalNoise
+#libraries needed by OFX-libnoise
 target_link_libraries(
-	FractalNoise
+	OFX-libnoise
 	${LIBNOISE_LIB}
 )
 
 #avoid the "lib" prefix set extension to ofx
 set_target_properties(
-	FractalNoise PROPERTIES
+	OFX-libnoise PROPERTIES
 	PREFIX ""
 	SUFFIX ".ofx"
 )
 
 #create the bundle
 add_custom_command(
-	TARGET FractalNoise 
+	TARGET OFX-libnoise 
 	POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E echo "Creating bundle FractalNoise.ofx.bundle"
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/FractalNoise.png $<TARGET_FILE_DIR:FractalNoise>/FractalNoise.ofx.bundle/Contents/Resources/FractalNoise.png
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:FractalNoise> $<TARGET_FILE_DIR:FractalNoise>/FractalNoise.ofx.bundle/Contents/${OFX_ARCHITECTURE}/$<TARGET_FILE_NAME:FractalNoise> 
+	COMMAND ${CMAKE_COMMAND} -E echo "Creating bundle OFX-libnoise.ofx.bundle"
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/Perlin.png $<TARGET_FILE_DIR:OFX-libnoise>/OFX-libnoise.ofx.bundle/Contents/Resources/Perlin.png
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:OFX-libnoise> $<TARGET_FILE_DIR:OFX-libnoise>/OFX-libnoise.ofx.bundle/Contents/${OFX_ARCHITECTURE}/$<TARGET_FILE_NAME:OFX-libnoise> 
 )
 
 ### installation
 message(STATUS PROJECT_BINARY_DIR : ${PROJECT_BINARY_DIR})
 
 install (
-	DIRECTORY "${PROJECT_BINARY_DIR}/FractalNoise.ofx.bundle"
+	DIRECTORY "${PROJECT_BINARY_DIR}/OFX-libnoise.ofx.bundle"
     DESTINATION .
 )

@@ -1,5 +1,5 @@
 /*
-OFX FractalNoise, a plugin using libnoise librairy. The Invert.cpp source was used as a template.
+Perlin is a OFX-effect using libnoise librairy. The Invert.cpp source was used as a template.
 
 Copyleft : GPL Version 3
 Author Amaury ABRIAL yruama_lairba@hotmail.com
@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 // Base class for the RGBA and the Alpha processor
-class FractalNoiseProcessorBase : public OFX::ImageProcessor {
+class PerlinProcessorBase : public OFX::ImageProcessor {
 protected :
   OFX::Image *_srcImg;
   
@@ -58,7 +58,7 @@ protected :
   noise::module::Perlin noiseGenerator;
 public :
   /** @brief no arg ctor */
-  FractalNoiseProcessorBase(OFX::ImageEffect &instance)
+  PerlinProcessorBase(OFX::ImageEffect &instance)
     : OFX::ImageProcessor(instance)
     , _srcImg(0)
     , posX(0)
@@ -92,11 +92,11 @@ public :
 
 // template to do the RGBA processing
 template <class PIX, int nComponents, int max>
-class FractalNoiseProcessor : public FractalNoiseProcessorBase {
+class PerlinProcessor : public PerlinProcessorBase {
 public :
   // ctor
-  FractalNoiseProcessor(OFX::ImageEffect &instance) 
-    : FractalNoiseProcessorBase(instance)
+  PerlinProcessor(OFX::ImageEffect &instance) 
+    : PerlinProcessorBase(instance)
   {}
 
   // and do some processing
@@ -148,7 +148,7 @@ public :
 
 ////////////////////////////////////////////////////////////////////////////////
 /** @brief The plugin that does our work */
-class FractalNoisePlugin : public OFX::ImageEffect {
+class PerlinPlugin : public OFX::ImageEffect {
 protected :
   // do not need to delete these, the ImageEffect is managing them for us
   OFX::Clip *dstClip_;
@@ -167,7 +167,7 @@ protected :
   
 public :
   /** @brief ctor */
-  FractalNoisePlugin(OfxImageEffectHandle handle)
+  PerlinPlugin(OfxImageEffectHandle handle)
     : ImageEffect(handle)
     , dstClip_(0)
     , srcClip_(0)
@@ -207,7 +207,7 @@ private:
   virtual void render(const OFX::RenderArguments &args);
 
   /* set up and run a processor */
-  void setupAndProcess(FractalNoiseProcessorBase &, const OFX::RenderArguments &args);
+  void setupAndProcess(PerlinProcessorBase &, const OFX::RenderArguments &args);
 };
 
 
@@ -220,7 +220,7 @@ private:
 
 /* set up and run a processor */
 void
-FractalNoisePlugin::setupAndProcess(FractalNoiseProcessorBase &processor, const OFX::RenderArguments &args)
+PerlinPlugin::setupAndProcess(PerlinProcessorBase &processor, const OFX::RenderArguments &args)
 {
   // get a dst image
   std::auto_ptr<OFX::Image> dst(dstClip_->fetchImage(args.time));
@@ -315,21 +315,21 @@ FractalNoisePlugin::setupAndProcess(FractalNoiseProcessorBase &processor, const 
 // the internal render function
 template <int nComponents>
 void
-FractalNoisePlugin::renderInternal(const OFX::RenderArguments &args, OFX::BitDepthEnum dstBitDepth)
+PerlinPlugin::renderInternal(const OFX::RenderArguments &args, OFX::BitDepthEnum dstBitDepth)
 {
     switch (dstBitDepth) {
         case OFX::eBitDepthUByte: {
-            FractalNoiseProcessor<unsigned char, nComponents, 255> fred(*this);
+            PerlinProcessor<unsigned char, nComponents, 255> fred(*this);
             setupAndProcess(fred, args);
             break;
         }
         case OFX::eBitDepthUShort: {
-            FractalNoiseProcessor<unsigned short, nComponents, 65535> fred(*this);
+            PerlinProcessor<unsigned short, nComponents, 65535> fred(*this);
             setupAndProcess(fred, args);
             break;
         }
         case OFX::eBitDepthFloat: {
-            FractalNoiseProcessor<float, nComponents, 1> fred(*this);
+            PerlinProcessor<float, nComponents, 1> fred(*this);
             setupAndProcess(fred, args);
             break;
         }
@@ -341,7 +341,7 @@ FractalNoisePlugin::renderInternal(const OFX::RenderArguments &args, OFX::BitDep
 
 // the overridden render function
 void
-FractalNoisePlugin::render(const OFX::RenderArguments &args)
+PerlinPlugin::render(const OFX::RenderArguments &args)
 {
   // instantiate the render code based on the pixel depth of the dst clip
   OFX::BitDepthEnum       dstBitDepth    = dstClip_->getPixelDepth();
@@ -365,14 +365,14 @@ FractalNoisePlugin::render(const OFX::RenderArguments &args)
 
 
 using namespace OFX;
-mDeclarePluginFactory(FractalNoisePluginFactory, {}, {});
+mDeclarePluginFactory(PerlinPluginFactory, {}, {});
 
-void FractalNoisePluginFactory::describe(OFX::ImageEffectDescriptor &desc)
+void PerlinPluginFactory::describe(OFX::ImageEffectDescriptor &desc)
 {
   // basic labels
-  desc.setLabels("FractalNoise", "FractalNoise", "FractalNoise");
-  desc.setPluginGrouping("Yru");
-  desc.setPluginDescription("FractalNoise generator");
+  desc.setLabels("Perlin", "Perlin", "Perlin");
+  desc.setPluginGrouping("Yru/OFX-libnoise");
+  desc.setPluginDescription("Perlin noise generator");
 
   // add the supported contexts, only filter at the moment
   desc.addSupportedContext(eContextFilter);
@@ -395,7 +395,7 @@ void FractalNoisePluginFactory::describe(OFX::ImageEffectDescriptor &desc)
 
 }
 
-void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc , OFX::ContextEnum context)
+void PerlinPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc , OFX::ContextEnum context)
 {
   //Silent "unused parameter" warning on the context variable
   (void)context;
@@ -540,9 +540,9 @@ void FractalNoisePluginFactory::describeInContext(OFX::ImageEffectDescriptor &de
     
 }
 
-OFX::ImageEffect* FractalNoisePluginFactory::createInstance(OfxImageEffectHandle handle, OFX::ContextEnum /*context*/)
+OFX::ImageEffect* PerlinPluginFactory::createInstance(OfxImageEffectHandle handle, OFX::ContextEnum /*context*/)
 {
-  return new FractalNoisePlugin(handle);
+  return new PerlinPlugin(handle);
 }
 
 namespace OFX 
@@ -551,7 +551,7 @@ namespace OFX
   {  
     void getPluginIDs(OFX::PluginFactoryArray &ids)
     {
-      static FractalNoisePluginFactory p("FractalNoise", 1, 0);
+      static PerlinPluginFactory p("Perlin", 1, 0);
       ids.push_back(&p);
     }
   }

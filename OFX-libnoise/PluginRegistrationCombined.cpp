@@ -1,5 +1,6 @@
 #include "Perlin.h"
 #include "Billow.h"
+#include "RidgedMulti.h"
 
 namespace OFX
 {
@@ -9,6 +10,7 @@ namespace OFX
         {
             getPerlinPluginID(ids);
             getBillowPluginID(ids);
+            getRidgedMultiPluginID(ids);
         }
     }
 }

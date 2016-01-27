@@ -68,6 +68,8 @@ add_library(
 	Perlin.cpp
 	Billow.h
 	Billow.cpp
+	RidgedMulti.h
+	RidgedMulti.cpp
 	PluginRegistrationCombined.cpp
 	../openfx-API/Support/Library/ofxsMultiThread.cpp
 	../openfx-API/Support/Library/ofxsInteract.cpp
@@ -108,6 +110,7 @@ add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E echo "Creating bundle OFX-libnoise.ofx.bundle"
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/Perlin.png $<TARGET_FILE_DIR:OFX-libnoise>/OFX-libnoise.ofx.bundle/Contents/Resources/Perlin.png
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/Billow.png $<TARGET_FILE_DIR:OFX-libnoise>/OFX-libnoise.ofx.bundle/Contents/Resources/Billow.png
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/RidgedMulti.png $<TARGET_FILE_DIR:OFX-libnoise>/OFX-libnoise.ofx.bundle/Contents/Resources/RidgedMulti.png
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:OFX-libnoise> $<TARGET_FILE_DIR:OFX-libnoise>/OFX-libnoise.ofx.bundle/Contents/${OFX_ARCHITECTURE}/$<TARGET_FILE_NAME:OFX-libnoise> 
 )
 

@@ -64,7 +64,9 @@ set(OFX_ARCHITECTURE "${OFX_ARCHITECTURE}" CACHE STRING
 ###OFX-libnoise plugin
 add_library(
 	OFX-libnoise MODULE
+	Perlin.h
 	Perlin.cpp
+	PluginRegistrationCombined.cpp
 	../openfx-API/Support/Library/ofxsMultiThread.cpp
 	../openfx-API/Support/Library/ofxsInteract.cpp
 	../openfx-API/Support/Library/ofxsProperty.cpp

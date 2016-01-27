@@ -545,14 +545,9 @@ OFX::ImageEffect* PerlinPluginFactory::createInstance(OfxImageEffectHandle handl
   return new PerlinPlugin(handle);
 }
 
-namespace OFX 
+void getPerlinPluginID(OFX::PluginFactoryArray &ids)
 {
-  namespace Plugin 
-  {  
-    void getPluginIDs(OFX::PluginFactoryArray &ids)
-    {
-      static PerlinPluginFactory p("Perlin", 1, 0);
-      ids.push_back(&p);
-    }
-  }
+    static PerlinPluginFactory p("Perlin", 1, 0);
+    ids.push_back(&p);
 }
+

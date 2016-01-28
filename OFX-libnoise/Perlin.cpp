@@ -22,7 +22,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 //include libnoise lib
-#include "noise/noise.h"
+#include "noise.h"
 
 #include <stdio.h>
 #include "ofxsImageEffect.h"

@@ -21,7 +21,7 @@ message(STATUS CMAKE_FIND_LIBRARY_SUFFIXES : ${CMAKE_FIND_LIBRARY_SUFFIXES})
 # try to find header
 find_path(
 	LIBNOISE_INCLUDE_PATH
-	NAMES noise/noise.h
+	NAMES noise.h
 )
 message(STATUS LIBNOISE_INCLUDE_PATH : ${LIBNOISE_INCLUDE_PATH})
 set(LIBNOISE_INCLUDE_PATH "" CACHE PATH "Path to the libnoise header ")

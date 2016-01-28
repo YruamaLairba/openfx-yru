@@ -1,8 +1,0 @@
-PATHTOROOT = ../openfx/Support
-
-include $(PATHTOROOT)/Plugins/Makefile_MinGW.master
-
-CXXFLAGS += -DOFX_EXTENSIONS_VEGAS -DOFX_EXTENSIONS_NUKE -DOFX_EXTENSIONS_NATRON -DOFX_EXTENSIONS_NATRON
-
-CXXFLAGS += -I../Misc -I../SupportExt
-VPATH += ../Misc ../SupportExt

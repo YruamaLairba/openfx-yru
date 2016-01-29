@@ -1,0 +1,123 @@
+cmake_minimum_required (VERSION 2.6)
+project (openfx-yru_OFX-libnoise)
+
+###compiling OFX_SUPPORT
+# add_library(
+	# OFX_SUPPORT STATIC
+	# ../openfx-API/Support/Library/ofxsInteract.cpp
+	# ../openfx-API/Support/Library/ofxsProperty.cpp
+	# ../openfx-API/Support/Library/ofxsLog.cpp
+	# ../openfx-API/Support/Library/ofxsCore.cpp
+	# ../openfx-API/Support/Library/ofxsPropertyValidation.cpp
+	# ../openfx-API/Support/Library/ofxsImageEffect.cpp
+	# ../openfx-API/Support/Library/ofxsParams.cpp
+# )
+
+message(STATUS envCMAKE_LIBRARY_PATH : $ENV{CMAKE_LIBRARY_PATH})
+message(STATUS envLIB : $ENV{LIB})
+message(STATUS CMAKE_FIND_LIBRARY_SUFFIXES : ${CMAKE_FIND_LIBRARY_SUFFIXES})
+
+###libnoise path
+# try to find header
+find_path(
+	LIBNOISE_INCLUDE_PATH
+	NAMES noise.h
+)
+message(STATUS LIBNOISE_INCLUDE_PATH : ${LIBNOISE_INCLUDE_PATH})
+set(LIBNOISE_INCLUDE_PATH "" CACHE PATH "Path to the libnoise header ")
+# try to find library
+find_library(LIBNOISE_LIB noise)
+message(STATUS LIBNOISE_LIB : ${LIBNOISE_LIB})
+set(LIBNOISE_LIB "LIBNOISE_LIB" CACHE FILEPATH "path to the libnoise library ")
+
+###determine target architecture for packaging
+message(STATUS CMAKE_SYSTEM_NAME : ${CMAKE_SYSTEM_NAME})
+message(STATUS CMAKE_SIZEOF_VOID_P : ${CMAKE_SIZEOF_VOID_P})
+
+set(OFX_ARCHITECTURE "")
+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+	if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+		set(OFX_ARCHITECTURE "Win32")
+	elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		set(OFX_ARCHITECTURE "Win64")
+	endif()
+elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+	if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+		set(OFX_ARCHITECTURE "Linux-x86")
+	elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		set(OFX_ARCHITECTURE "Linux-x86-64")
+	endif()
+elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+	if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+		set(OFX_ARCHITECTURE "MacOS")
+	elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		set(OFX_ARCHITECTURE "MacOS-x86-64")
+	endif()
+endif()
+
+message(STATUS OFX_ARCHITECTURE : ${OFX_ARCHITECTURE})
+set(OFX_ARCHITECTURE "${OFX_ARCHITECTURE}" CACHE STRING 
+	"operating system architecture the plug-in is built for"
+)
+
+
+###OFX-libnoise plugin
+add_library(
+	OFX-libnoise MODULE
+	Perlin.h
+	Perlin.cpp
+	Billow.h
+	Billow.cpp
+	RidgedMulti.h
+	RidgedMulti.cpp
+	PluginRegistrationCombined.cpp
+	../openfx-API/Support/Library/ofxsMultiThread.cpp
+	../openfx-API/Support/Library/ofxsInteract.cpp
+	../openfx-API/Support/Library/ofxsProperty.cpp
+	../openfx-API/Support/Library/ofxsLog.cpp
+	../openfx-API/Support/Library/ofxsCore.cpp
+	../openfx-API/Support/Library/ofxsPropertyValidation.cpp
+	../openfx-API/Support/Library/ofxsImageEffect.cpp
+	../openfx-API/Support/Library/ofxsParams.cpp
+)
+
+# configuring OFX-libnoise includes path
+target_include_directories(
+	OFX-libnoise PRIVATE 
+	${LIBNOISE_INCLUDE_PATH} 
+	"../include" 
+	"../openfx-API/include" 
+	"../openfx-API/Support/include" 
+)
+
+#libraries needed by OFX-libnoise
+target_link_libraries(
+	OFX-libnoise
+	${LIBNOISE_LIB}
+)
+
+#avoid the "lib" prefix set extension to ofx
+set_target_properties(
+	OFX-libnoise PROPERTIES
+	PREFIX ""
+	SUFFIX ".ofx"
+)
+
+#create the bundle
+add_custom_command(
+	TARGET OFX-libnoise 
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E echo "Creating bundle OFX-libnoise.ofx.bundle"
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/Perlin.png $<TARGET_FILE_DIR:OFX-libnoise>/OFX-libnoise.ofx.bundle/Contents/Resources/Perlin.png
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/Billow.png $<TARGET_FILE_DIR:OFX-libnoise>/OFX-libnoise.ofx.bundle/Contents/Resources/Billow.png
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/RidgedMulti.png $<TARGET_FILE_DIR:OFX-libnoise>/OFX-libnoise.ofx.bundle/Contents/Resources/RidgedMulti.png
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:OFX-libnoise> $<TARGET_FILE_DIR:OFX-libnoise>/OFX-libnoise.ofx.bundle/Contents/${OFX_ARCHITECTURE}/$<TARGET_FILE_NAME:OFX-libnoise> 
+)
+
+### installation
+message(STATUS PROJECT_BINARY_DIR : ${PROJECT_BINARY_DIR})
+
+install (
+	DIRECTORY "${PROJECT_BINARY_DIR}/OFX-libnoise.ofx.bundle"
+    DESTINATION .
+)

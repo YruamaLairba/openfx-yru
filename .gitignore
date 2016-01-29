@@ -1,0 +1,22 @@
+# Ignore the documentation folder
+*.o
+*.ofx
+*.a
+*~
+
+build
+
+xcuserdata
+
+*.xcworkspace
+
+.DS_Store
+
+*-32-release
+*-32-debug
+*-64-release
+*-64-debug
+
+DerivedData
+
+
